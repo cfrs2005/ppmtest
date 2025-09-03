@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 语言设置 / Language Settings
+
+**重要：始终使用中文与用户沟通**
+- 所有回复、说明、错误信息均使用中文
+- 代码注释可以使用英文，但用户交流必须使用中文
+- 技术术语可以保留英文，但需要用中文解释
+
 ## Project Overview
 
 This is a **Claude Code PM System** - a comprehensive project management and development workflow system that transforms PRDs into shipped code through structured planning, GitHub integration, and parallel AI agent execution.
