@@ -3,6 +3,8 @@ name: bilibili-video-analyzer
 description: 技术实现计划：基于Flask的B站视频内容分析服务
 status: ready
 created: 2025-09-03T10:21:09Z
+updated: 2025-09-03T11:30:00Z
+github: https://github.com/cfrs2005/ppmtest/issues/1
 prd: .claude/prds/bilibili-video-analyzer.md
 ---
 
@@ -491,22 +493,22 @@ def test_subtitle_parsing():
 ## Tasks Created
 
 ### 基础架构 (2个任务)
-- [ ] 001.md - 项目初始化和基础框架搭建 (parallel: true, 4-6h)
-- [ ] 002.md - 数据库模型设计和迁移 (parallel: true, 3-4h)
+- [ ] #2 - 项目初始化和基础框架搭建 (parallel: true, 4-6h)
+- [ ] #3 - 数据库模型设计和迁移 (parallel: true, 3-4h)
 
 ### 核心模块 (3个任务)
-- [ ] 003.md - B站视频信息提取模块 (parallel: true, 6-8h)
-- [ ] 004.md - 大模型内容分析模块 (parallel: true, 8-10h)
-- [ ] 005.md - 知识库管理模块 (parallel: true, 6-8h)
+- [ ] #4 - B站视频信息提取模块 (parallel: true, 6-8h)
+- [ ] #8 - 大模型内容分析模块 (parallel: true, 8-10h)
+- [ ] #9 - 知识库管理模块 (parallel: true, 6-8h)
 
 ### 应用层 (3个任务)
-- [ ] 006.md - REST API设计和实现 (parallel: true, 8-10h)
-- [ ] 007.md - Web用户界面开发 (parallel: true, 10-12h)
-- [ ] 008.md - 异步任务处理和队列系统 (parallel: true, 6-8h)
+- [ ] #10 - REST API设计和实现 (parallel: true, 8-10h)
+- [ ] #11 - Web用户界面开发 (parallel: true, 10-12h)
+- [ ] #12 - 异步任务处理和队列系统 (parallel: true, 6-8h)
 
 ### 质量保证 (2个任务)
-- [ ] 009.md - 测试套件和质量保证 (parallel: true, 8-10h)
-- [ ] 010.md - 部署配置和运维文档 (parallel: true, 4-6h)
+- [ ] #13 - 测试套件和质量保证 (parallel: true, 8-10h)
+- [ ] #14 - 部署配置和运维文档 (parallel: true, 4-6h)
 
 ### 任务统计
 - **总任务数**: 10个
