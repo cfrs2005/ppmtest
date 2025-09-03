@@ -2,71 +2,139 @@
 
 set -e
 
-EPIC_NAME="$1"
-if [ -z "$EPIC_NAME" ]; then
-    echo "❌ Usage: epic-start <epic_name>"
+ARGUMENTS="$1"
+
+if [ -z "$ARGUMENTS" ]; then
+    echo "❌ Usage: $0 <epic_name>"
     exit 1
 fi
 
-EPIC_DIR=".claude/epics/$EPIC_NAME"
-EPIC_FILE="$EPIC_DIR/epic.md"
+echo "🚀 Starting epic: $ARGUMENTS"
 
-# Check if epic exists
-if [ ! -f "$EPIC_FILE" ]; then
-    echo "❌ Epic not found: $EPIC_NAME"
-    echo "Available epics:"
-    ls -la .claude/epics/ | grep "^d" | awk '{print $9}' | grep -v "^\.$" | grep -v "^\.\.$"
+# 1. Verify epic exists
+if [ ! -f ".claude/epics/$ARGUMENTS/epic.md" ]; then
+    echo "❌ Epic not found. Run: /pm:prd-parse $ARGUMENTS"
     exit 1
 fi
 
-# Check for uncommitted changes
+# 2. Check GitHub sync
+if ! grep -q "github:" ".claude/epics/$ARGUMENTS/epic.md"; then
+    echo "❌ Epic not synced. Run: /pm:epic-sync $ARGUMENTS first"
+    exit 1
+fi
+
+# 3. Check for uncommitted changes
 if [ -n "$(git status --porcelain)" ]; then
     echo "❌ You have uncommitted changes. Please commit or stash them before starting an epic."
-    echo ""
-    echo "To commit changes:"
-    echo "  git add ."
-    echo "  git commit -m \"Your commit message\""
-    echo ""
-    echo "To stash changes:"
-    echo "  git stash push -m \"Work in progress\""
     exit 1
 fi
 
-# Check if branch exists
-BRANCH_NAME="epic/$EPIC_NAME"
-if git branch -a | grep -q "$BRANCH_NAME"; then
-    echo "✅ Using existing branch: $BRANCH_NAME"
-    git checkout "$BRANCH_NAME"
-    git pull origin "$BRANCH_NAME"
-else
-    echo "✅ Creating new branch: $BRANCH_NAME"
+# 4. Create or enter branch
+if ! git branch -a | grep -q "epic/$ARGUMENTS"; then
+    echo "📁 Creating branch: epic/$ARGUMENTS"
     git checkout main
     git pull origin main
-    git checkout -b "$BRANCH_NAME"
-    git push -u origin "$BRANCH_NAME"
+    git checkout -b epic/$ARGUMENTS
+    git push -u origin epic/$ARGUMENTS
+else
+    echo "📁 Using existing branch: epic/$ARGUMENTS"
+    git checkout epic/$ARGUMENTS
+    git pull origin epic/$ARGUMENTS
 fi
 
-# Get GitHub URL from epic file
-GITHUB_URL=$(grep -A 10 "^github:" "$EPIC_FILE" | head -1 | cut -d' ' -f2-)
+# 5. Identify ready issues
+echo "🔍 Analyzing task dependencies..."
+READY_ISSUES=()
+BLOCKED_ISSUES=()
 
-echo ""
-echo "🚀 Epic Started: $EPIC_NAME"
-echo "Branch: $BRANCH_NAME"
-if [ -n "$GITHUB_URL" ]; then
-    echo "GitHub: $GITHUB_URL"
-fi
-echo ""
-
-# Show available tasks
-echo "📋 Available Tasks:"
-find "$EPIC_DIR" -name "*.md" -not -name "epic.md" -not -name "*.analysis.md" | sort | while read task_file; do
-    task_name=$(basename "$task_file" .md)
-    echo "  - $task_name"
+# Find all task files
+for task_file in .claude/epics/$ARGUMENTS/*.md; do
+    if [[ "$task_file" =~ ^[0-9]+\.md$ ]] || [[ "$task_file" =~ [0-9]+-analysis\.md$ ]]; then
+        continue
+    fi
+    
+    if [ "$task_file" = ".claude/epics/$ARGUMENTS/epic.md" ]; then
+        continue
+    fi
+    
+    # Extract issue number from filename
+    issue_num=$(basename "$task_file" .md)
+    
+    # Check if issue is ready (simplified check)
+    if grep -q "status: ready" "$task_file" 2>/dev/null || grep -q "status: \"ready\"" "$task_file" 2>/dev/null; then
+        READY_ISSUES+=("$issue_num")
+    elif grep -q "status: blocked" "$task_file" 2>/dev/null || grep -q "status: \"blocked\"" "$task_file" 2>/dev/null; then
+        BLOCKED_ISSUES+=("$issue_num")
+    fi
 done
 
+echo "✅ Found ${#READY_ISSUES[@]} ready issues"
+echo "⏸ Found ${#BLOCKED_ISSUES[@]} blocked issues"
+
+# 6. Launch parallel agents for ready issues
+for issue_num in "${READY_ISSUES[@]}"; do
+    task_file=".claude/epics/$ARGUMENTS/$issue_num.md"
+    
+    if [ ! -f "$task_file" ]; then
+        echo "❌ Task file not found: $task_file"
+        continue
+    fi
+    
+    echo "🚀 Starting issue #$issue_num"
+    
+    # Extract title from task file
+    title=$(grep "^# " "$task_file" | head -1 | sed 's/^# //')
+    
+    echo "   Title: $title"
+    
+    # Create updates directory if it doesn't exist
+    mkdir -p ".claude/epics/$ARGUMENTS/updates/$issue_num"
+    
+    # For now, we'll just mark as in-progress (actual agent launching would be done via Claude Code)
+    echo "   Status: Ready for agent deployment"
+    
+    # Update task status
+    sed -i '' "s/status: ready/status: in_progress/" "$task_file" 2>/dev/null || sed -i "s/status: ready/status: in_progress/" "$task_file" 2>/dev/null
+done
+
+# 7. Create execution status
+cat > ".claude/epics/$ARGUMENTS/execution-status.md" << EOF
+---
+started: $(date -Iseconds)
+branch: epic/$ARGUMENTS
+---
+
+# Execution Status
+
+## Active Agents
+${#READY_ISSUES[@]} issues ready for parallel execution
+
+## Ready Issues
+$(for issue in "${READY_ISSUES[@]}"; do echo "- #$issue - Ready for agent deployment"; done)
+
+## Blocked Issues
+$(for issue in "${BLOCKED_ISSUES[@]}"; do echo "- #$issue - Blocked by dependencies"; done)
+
+## Completed
+- None yet
+
+## Next Steps
+- Deploy parallel agents for ready issues
+- Monitor progress with /pm:epic-status $ARGUMENTS
+- Merge when complete with /pm:epic-merge $ARGUMENTS
+EOF
+
 echo ""
-echo "📝 Next steps:"
-echo "  1. Use /pm:next to get the next available task"
-echo "  2. Use /pm:issue-start <number> to start working on a specific issue"
-echo "  3. Use /pm:epic-status $EPIC_NAME to check progress"
+echo "✅ Epic execution started: $ARGUMENTS"
+echo "📁 Branch: epic/$ARGUMENTS"
+echo "🎯 Ready issues: ${#READY_ISSUES[@]}"
+echo "⏸ Blocked issues: ${#BLOCKED_ISSUES[@]}"
 echo ""
+echo "Monitor progress:"
+echo "  /pm:epic-status $ARGUMENTS"
+echo ""
+echo "View branch changes:"
+echo "  git status"
+echo ""
+echo "Merge when complete:"
+echo "  /pm:epic-merge $ARGUMENTS"
