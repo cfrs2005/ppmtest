@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}关于 - Bilibili视频分析系统{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>
+                <i class="fas fa-info-circle"></i> 关于系统
+            </h1>
+            <p class="text-muted">了解Bilibili视频分析系统的详细信息</p>
+        </div>
+    </div>
+
+    <!-- System Overview -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">系统概述</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4>Bilibili视频分析系统</h4>
+                            <p class="lead">基于AI技术的智能视频内容分析平台</p>
+                            <p>
+                                本系统利用先进的人工智能技术，自动分析Bilibili视频内容，提取关键信息和知识点，
+                                构建结构化的知识库。通过智能化的内容处理，帮助用户快速获取视频中的有价值信息。
+                            </p>
+                            <div class="mt-3">
+                                <span class="badge bg-primary me-2">v1.0.0</span>
+                                <span class="badge bg-success me-2">稳定版</span>
+                                <span class="badge bg-info">开源项目</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <img src="/static/images/logo.png" alt="系统Logo" class="img-fluid" style="max-height: 200px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">主要功能</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="feature-item mb-4">
+                                <h6><i class="fas fa-download text-primary me-2"></i>视频内容提取</h6>
+                                <p>自动下载Bilibili视频的字幕内容，支持多种语言和格式，为后续分析提供基础数据。</p>
+                            </div>
+                            <div class="feature-item mb-4">
+                                <h6><i class="fas fa-brain text-success me-2"></i>AI智能分析</h6>
+                                <p>使用OpenAI GPT、Anthropic Claude等先进AI模型，深度分析视频内容，提取关键信息。</p>
+                            </div>
+                            <div class="feature-item mb-4">
+                                <h6><i class="fas fa-book text-info me-2"></i>知识库管理</h6>
+                                <p>自动构建和管理知识库，支持标签、分类、搜索等功能，便于知识检索和管理。</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="feature-item mb-4">
+                                <h6><i class="fas fa-chart-line text-warning me-2"></i>数据可视化</h6>
+                                <p>提供丰富的图表和统计信息，直观展示分析结果和系统状态。</p>
+                            </div>
+                            <div class="feature-item mb-4">
+                                <h6><i class="fas fa-file-export text-danger me-2"></i>多格式导出</h6>
+                                <p>支持JSON、Markdown、CSV等多种格式的数据导出，便于数据共享和进一步处理。</p>
+                            </div>
+                            <div class="feature-item mb-4">
+                                <h6><i class="fas fa-cogs text-secondary me-2"></i>灵活配置</h6>
+                                <p>提供丰富的配置选项，支持自定义分析参数、API设置等，满足不同需求。</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technology Stack -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">技术栈</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>后端技术</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fab fa-python text-primary me-2"></i>Python 3.8+</li>
+                                <li><i class="fas fa-flask text-success me-2"></i>Flask</li>
+                                <li><i class="fas fa-database text-info me-2"></i>SQLAlchemy</li>
+                                <li><i class="fas fa-cogs text-warning me-2"></i>Celery</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>前端技术</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fab fa-html5 text-danger me-2"></i>HTML5</li>
+                                <li><i class="fab fa-css3-alt text-primary me-2"></i>CSS3</li>
+                                <li><i class="fab fa-js text-warning me-2"></i>JavaScript ES6+</li>
+                                <li><i class="fab fa-bootstrap text-info me-2"></i>Bootstrap 5</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>AI服务</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-robot text-success me-2"></i>OpenAI GPT</li>
+                                <li><i class="fas fa-brain text-primary me-2"></i>Anthropic Claude</li>
+                                <li><i class="fas fa-language text-info me-2"></i>自然语言处理</li>
+                                <li><i class="fas fa-project-diagram text-warning me-2"></i>机器学习</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Requirements -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">系统要求</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>最低要求</h6>
+                            <ul>
+                                <li>操作系统：Windows 10+, macOS 10.14+, Ubuntu 18.04+</li>
+                                <li>内存：4GB RAM</li>
+                                <li>存储：1GB 可用空间</li>
+                                <li>网络：稳定的互联网连接</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>推荐配置</h6>
+                            <ul>
+                                <li>操作系统：Windows 11+, macOS 12+, Ubuntu 20.04+</li>
+                                <li>内存：8GB RAM 或更多</li>
+                                <li>存储：5GB 可用空间</li>
+                                <li>网络：高速互联网连接</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Development Team -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">开发团队</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div class="team-member">
+                                <i class="fas fa-user-circle fa-4x text-primary mb-3"></i>
+                                <h6>项目负责人</h6>
+                                <p class="text-muted">系统架构设计和核心功能开发</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="team-member">
+                                <i class="fas fa-user-circle fa-4x text-success mb-3"></i>
+                                <h6>AI算法工程师</h6>
+                                <p class="text-muted">AI模型集成和算法优化</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="team-member">
+                                <i class="fas fa-user-circle fa-4x text-info mb-3"></i>
+                                <h6>前端开发工程师</h6>
+                                <p class="text-muted">用户界面设计和前端实现</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">联系我们</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>项目地址</h6>
+                            <p>
+                                <i class="fab fa-github me-2"></i>
+                                <a href="https://github.com/your-username/bilibili-analyzer" target="_blank">
+                                    GitHub仓库
+                                </a>
+                            </p>
+                            <p>
+                                <i class="fas fa-book me-2"></i>
+                                <a href="#" target="_blank">
+                                    项目文档
+                                </a>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>技术支持</h6>
+                            <p>
+                                <i class="fas fa-envelope me-2"></i>
+                                <a href="mailto:support@example.com">support@example.com</a>
+                            </p>
+                            <p>
+                                <i class="fas fa-bug me-2"></i>
+                                <a href="#" target="_blank">
+                                    问题反馈
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- License -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">开源许可</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        本项目采用 <strong>MIT许可证</strong> 开源，您可以自由使用、修改和分发本软件，
+                        但需要包含许可证声明和版权信息。
+                    </p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>注意：</strong>使用本系统时需要遵守相关AI服务的使用条款和隐私政策。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

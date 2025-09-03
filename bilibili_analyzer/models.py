@@ -6,6 +6,7 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Index, UniqueConstraint
 from sqlalchemy.dialects.sqlite import JSON
+from werkzeug.security import generate_password_hash, check_password_hash
 import json
 
 # 创建数据库实例

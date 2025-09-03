@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - Bilibili视频分析系统{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <section class="hero-section text-center py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-brain text-primary"></i> Bilibili视频分析系统
+                </h1>
+                <p class="lead mb-4">
+                    基于AI技术的智能视频内容分析平台，自动提取、分析和组织Bilibili视频中的知识内容
+                </p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-primary btn-lg" onclick="scrollToAnalysis()">
+                        <i class="fas fa-play"></i> 开始分析
+                    </button>
+                    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-chart-bar"></i> 查看统计
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-video fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">视频内容提取</h5>
+                        <p class="card-text">
+                            自动下载和提取Bilibili视频的字幕内容，支持多种语言和格式
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-brain fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">AI智能分析</h5>
+                        <p class="card-text">
+                            使用先进的AI模型分析视频内容，提取关键信息和知识点
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 mb-4">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-book fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">知识库管理</h5>
+                        <p class="card-text">
+                            自动构建和管理知识库，支持搜索、标签和分类管理
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Analysis Section -->
+    <section id="analysis-section" class="analysis-section py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-cogs"></i> 视频分析
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="analysis-form">
+                            <div class="mb-3">
+                                <label for="video-url" class="form-label">Bilibili视频URL</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-link"></i>
+                                    </span>
+                                    <input type="url" class="form-control" id="video-url" 
+                                           placeholder="https://www.bilibili.com/video/BVxxxxxxxx" required>
+                                </div>
+                                <div class="form-text">
+                                    支持Bilibili视频链接，系统会自动提取视频ID
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="language" class="form-label">字幕语言</label>
+                                    <select class="form-select" id="language">
+                                        <option value="zh-CN">中文</option>
+                                        <option value="en">English</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="analysis-type" class="form-label">分析类型</label>
+                                    <select class="form-select" id="analysis-type">
+                                        <option value="full">完整分析</option>
+                                        <option value="summary">仅总结</option>
+                                        <option value="keywords">仅关键词</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="force-reanalyze">
+                                    <label class="form-check-label" for="force-reanalyze">
+                                        强制重新分析（忽略缓存）
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg" id="analyze-btn">
+                                    <i class="fas fa-play"></i> 开始分析
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Analysis Progress -->
+                        <div id="analysis-progress" class="mt-4" style="display: none;">
+                            <div class="progress mb-3">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%"></div>
+                            </div>
+                            <div class="text-center">
+                                <span id="progress-text">正在准备分析...</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Analysis Result -->
+                        <div id="analysis-result" class="mt-4" style="display: none;">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Analysis Section -->
+    <section class="recent-analysis-section py-5">
+        <div class="row">
+            <div class="col-12">
+                <h3 class="mb-4">
+                    <i class="fas fa-history"></i> 最近分析
+                </h3>
+                <div id="recent-analysis" class="row">
+                    <!-- Recent analysis items will be populated here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- System Status Section -->
+    <section class="system-status-section py-5">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-server"></i> 系统状态
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="system-status">
+                            <!-- System status will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadRecentAnalysis();
+    loadSystemStatus();
+});
+
+// 滚动到分析区域
+function scrollToAnalysis() {
+    document.getElementById('analysis-section').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+}
+
+// 分析表单提交
+document.getElementById('analysis-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const videoUrl = document.getElementById('video-url').value;
+    const language = document.getElementById('language').value;
+    const analysisType = document.getElementById('analysis-type').value;
+    const forceReanalyze = document.getElementById('force-reanalyze').checked;
+    
+    // 提取BV号
+    const bvid = extractBvid(videoUrl);
+    if (!bvid) {
+        showToast('错误', '无效的Bilibili视频链接', 'error');
+        return;
+    }
+    
+    startAnalysis(bvid, language, analysisType, forceReanalyze);
+});
+
+// 提取BV号
+function extractBvid(url) {
+    const match = url.match(/\/video\/(BV\w+)/);
+    return match ? match[1] : null;
+}
+
+// 开始分析
+function startAnalysis(bvid, language, analysisType, forceReanalyze) {
+    const progressDiv = document.getElementById('analysis-progress');
+    const resultDiv = document.getElementById('analysis-result');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    
+    // 显示进度条
+    progressDiv.style.display = 'block';
+    resultDiv.style.display = 'none';
+    analyzeBtn.disabled = true;
+    
+    // 更新进度
+    updateProgress(10, '正在提取视频信息...');
+    
+    // 先提取视频信息
+    fetch('/api/v1/video/extract', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            bvid: bvid
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message || '视频提取失败');
+        }
+        
+        updateProgress(30, '正在下载字幕...');
+        
+        // 下载字幕
+        return fetch('/api/v1/subtitle/download', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bvid: bvid,
+                language: language
+            })
+        });
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message || '字幕下载失败');
+        }
+        
+        updateProgress(50, '正在分析内容...');
+        
+        // 分析内容
+        return fetch('/api/v1/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                bvid: bvid,
+                language: language,
+                service_name: analysisType,
+                force_reanalyze: forceReanalyze
+            })
+        });
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message || '分析失败');
+        }
+        
+        updateProgress(100, '分析完成！');
+        
+        // 显示结果
+        displayAnalysisResult(data.data);
+        
+        // 隐藏进度条，显示结果
+        setTimeout(() => {
+            progressDiv.style.display = 'none';
+            resultDiv.style.display = 'block';
+            analyzeBtn.disabled = false;
+            
+            // 刷新最近分析
+            loadRecentAnalysis();
+        }, 1000);
+    })
+    .catch(error => {
+        console.error('Analysis error:', error);
+        showToast('分析失败', error.message, 'error');
+        progressDiv.style.display = 'none';
+        analyzeBtn.disabled = false;
+    });
+}
+
+// 更新进度条
+function updateProgress(percent, text) {
+    const progressBar = document.querySelector('.progress-bar');
+    const progressText = document.getElementById('progress-text');
+    
+    progressBar.style.width = percent + '%';
+    progressText.textContent = text;
+}
+
+// 显示分析结果
+function displayAnalysisResult(data) {
+    const resultDiv = document.getElementById('analysis-result');
+    
+    const html = `
+        <div class="alert alert-success">
+            <h5><i class="fas fa-check-circle"></i> 分析完成</h5>
+            <p>视频分析成功完成，共发现 ${data.knowledge_entries ? data.knowledge_entries.length : 0} 个知识点</p>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">视频信息</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>标题：</strong> ${data.analysis.video_title || '未知'}</p>
+                <p><strong>作者：</strong> ${data.analysis.video_author || '未知'}</p>
+                <p><strong>分析时间：</strong> ${data.analysis.analysis_time || '未知'}</p>
+            </div>
+        </div>
+        
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">内容总结</h6>
+            </div>
+            <div class="card-body">
+                <p>${data.analysis.summary || '无总结'}</p>
+            </div>
+        </div>
+        
+        ${data.analysis.key_points ? `
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">关键点</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    ${data.analysis.key_points.map(point => `<li class="list-group-item">${point}</li>`).join('')}
+                </ul>
+            </div>
+        </div>
+        ` : ''}
+        
+        ${data.analysis.tags ? `
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">标签</h6>
+            </div>
+            <div class="card-body">
+                ${data.analysis.tags.map(tag => `<span class="badge bg-primary me-2">${tag}</span>`).join('')}
+            </div>
+        </div>
+        ` : ''}
+        
+        <div class="d-flex gap-2">
+            <a href="/analysis/${data.analysis.id}" class="btn btn-primary">
+                <i class="fas fa-eye"></i> 查看详情
+            </a>
+            <button class="btn btn-outline-primary" onclick="exportAnalysis(${data.analysis.id})">
+                <i class="fas fa-download"></i> 导出结果
+            </button>
+        </div>
+    `;
+    
+    resultDiv.innerHTML = html;
+}
+
+// 加载最近分析
+function loadRecentAnalysis() {
+    fetch('/api/v1/analyses?limit=5')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayRecentAnalysis(data.data.items);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading recent analysis:', error);
+        });
+}
+
+// 显示最近分析
+function displayRecentAnalysis(analyses) {
+    const container = document.getElementById('recent-analysis');
+    
+    if (analyses.length === 0) {
+        container.innerHTML = '<div class="col-12"><p class="text-muted text-center">暂无分析记录</p></div>';
+        return;
+    }
+    
+    const html = analyses.map(analysis => `
+        <div class="col-md-6 col-lg-4 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">${analysis.video?.title || '未知视频'}</h6>
+                    <p class="card-text">
+                        <small class="text-muted">作者：${analysis.video?.author || '未知'}</small>
+                    </p>
+                    <p class="card-text">
+                        <small class="text-muted">分析时间：${new Date(analysis.created_at).toLocaleString()}</small>
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary">${analysis.knowledge_entries_count || 0} 个知识点</span>
+                        <a href="/analysis/${analysis.id}" class="btn btn-sm btn-outline-primary">
+                            查看
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    container.innerHTML = html;
+}
+
+// 加载系统状态
+function loadSystemStatus() {
+    fetch('/api/v1/health')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displaySystemStatus(data.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading system status:', error);
+        });
+}
+
+// 显示系统状态
+function displaySystemStatus(status) {
+    const container = document.getElementById('system-status');
+    
+    const html = `
+        <div class="col-md-4">
+            <div class="text-center">
+                <i class="fas fa-database fa-2x ${status.components.database === 'healthy' ? 'text-success' : 'text-danger'}"></i>
+                <h6>数据库</h6>
+                <span class="badge ${status.components.database === 'healthy' ? 'bg-success' : 'bg-danger'}">
+                    ${status.components.database === 'healthy' ? '正常' : '异常'}
+                </span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <i class="fas fa-cogs fa-2x ${status.components.api === 'healthy' ? 'text-success' : 'text-danger'}"></i>
+                <h6>API服务</h6>
+                <span class="badge ${status.components.api === 'healthy' ? 'bg-success' : 'bg-danger'}">
+                    ${status.components.api === 'healthy' ? '正常' : '异常'}
+                </span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="text-center">
+                <i class="fas fa-brain fa-2x text-info"></i>
+                <h6>AI服务</h6>
+                <span class="badge bg-info">
+                    就绪
+                </span>
+            </div>
+        </div>
+    `;
+    
+    container.innerHTML = html;
+}
+
+// 导出分析结果
+function exportAnalysis(analysisId) {
+    window.open(`/api/v1/analysis/${analysisId}/export`, '_blank');
+}
+</script>
+{% endblock %}

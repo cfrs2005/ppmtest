@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}仪表板 - Bilibili视频分析系统{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>
+                <i class="fas fa-tachometer-alt"></i> 仪表板
+            </h1>
+            <p class="text-muted">系统概览和统计信息</p>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-users fa-2x text-primary"></i>
+                    <h5 class="mt-2">{{ channel_count }}</h5>
+                    <p class="text-muted">频道数量</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-video fa-2x text-success"></i>
+                    <h5 class="mt-2">{{ video_count }}</h5>
+                    <p class="text-muted">视频数量</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-brain fa-2x text-info"></i>
+                    <h5 class="mt-2">{{ analysis_count }}</h5>
+                    <p class="text-muted">分析次数</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-book fa-2x text-warning"></i>
+                    <h5 class="mt-2" id="knowledge-count">0</h5>
+                    <p class="text-muted">知识条目</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">分析趋势</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="analysis-trend-chart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">知识类型分布</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="knowledge-type-chart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">最近活动</h5>
+                </div>
+                <div class="card-body">
+                    <div id="recent-activity">
+                        <!-- Recent activity will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Videos -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">热门视频</h5>
+                </div>
+                <div class="card-body">
+                    <div id="top-videos">
+                        <!-- Top videos will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">热门标签</h5>
+                </div>
+                <div class="card-body">
+                    <div id="top-tags">
+                        <!-- Top tags will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardData();
+    initializeCharts();
+    loadRecentActivity();
+    loadTopVideos();
+    loadTopTags();
+});
+
+// 加载仪表板数据
+function loadDashboardData() {
+    // 加载知识条目数量
+    fetch('/api/v1/knowledge/stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('knowledge-count').textContent = data.data.total_entries;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading knowledge stats:', error);
+        });
+}
+
+// 初始化图表
+function initializeCharts() {
+    // 分析趋势图
+    const trendCtx = document.getElementById('analysis-trend-chart').getContext('2d');
+    const trendChart = new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: '分析次数',
+                data: [],
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // 知识类型分布图
+    const typeCtx = document.getElementById('knowledge-type-chart').getContext('2d');
+    const typeChart = new Chart(typeCtx, {
+        type: 'doughnut',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 205, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // 加载图表数据
+    loadChartData(trendChart, typeChart);
+}
+
+// 加载图表数据
+function loadChartData(trendChart, typeChart) {
+    // 加载分析趋势数据
+    fetch('/api/v1/stats/analysis-trend')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                trendChart.data.labels = data.data.labels;
+                trendChart.data.datasets[0].data = data.data.values;
+                trendChart.update();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading analysis trend:', error);
+        });
+
+    // 加载知识类型数据
+    fetch('/api/v1/stats/knowledge-types')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                typeChart.data.labels = data.data.labels;
+                typeChart.data.datasets[0].data = data.data.values;
+                typeChart.update();
+            }
+        })
+        .catch(error => {
+            console.error('Error loading knowledge types:', error);
+        });
+}
+
+// 加载最近活动
+function loadRecentActivity() {
+    fetch('/api/v1/activity/recent')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayRecentActivity(data.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading recent activity:', error);
+        });
+}
+
+// 显示最近活动
+function displayRecentActivity(activities) {
+    const container = document.getElementById('recent-activity');
+    
+    if (activities.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">暂无活动记录</p>';
+        return;
+    }
+
+    const html = activities.map(activity => `
+        <div class="activity-item d-flex align-items-center mb-3">
+            <div class="activity-icon me-3">
+                <i class="fas fa-${getActivityIcon(activity.type)} text-${getActivityColor(activity.type)}"></i>
+            </div>
+            <div class="activity-content flex-grow-1">
+                <div class="activity-title">${activity.title}</div>
+                <div class="activity-time text-muted small">${App.Utils.formatTime(activity.timestamp)}</div>
+            </div>
+        </div>
+    `).join('');
+
+    container.innerHTML = html;
+}
+
+// 获取活动图标
+function getActivityIcon(type) {
+    const icons = {
+        'analysis': 'brain',
+        'video': 'video',
+        'knowledge': 'book',
+        'export': 'download',
+        'settings': 'cog'
+    };
+    return icons[type] || 'circle';
+}
+
+// 获取活动颜色
+function getActivityColor(type) {
+    const colors = {
+        'analysis': 'primary',
+        'video': 'success',
+        'knowledge': 'info',
+        'export': 'warning',
+        'settings': 'secondary'
+    };
+    return colors[type] || 'secondary';
+}
+
+// 加载热门视频
+function loadTopVideos() {
+    fetch('/api/v1/videos/top?limit=5')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayTopVideos(data.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading top videos:', error);
+        });
+}
+
+// 显示热门视频
+function displayTopVideos(videos) {
+    const container = document.getElementById('top-videos');
+    
+    if (videos.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">暂无视频数据</p>';
+        return;
+    }
+
+    const html = videos.map(video => `
+        <div class="top-video-item d-flex align-items-center mb-3">
+            <img src="${video.cover_url || '/static/images/default-cover.jpg'}" 
+                 alt="${video.title}" class="me-3" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+            <div class="video-info flex-grow-1">
+                <div class="video-title">${video.title}</div>
+                <div class="video-stats text-muted small">
+                    <i class="fas fa-eye"></i> ${video.view_count || 0} | 
+                    <i class="fas fa-brain"></i> ${video.analysis_count || 0}
+                </div>
+            </div>
+        </div>
+    `).join('');
+
+    container.innerHTML = html;
+}
+
+// 加载热门标签
+function loadTopTags() {
+    fetch('/api/v1/tags/top?limit=10')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayTopTags(data.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading top tags:', error);
+        });
+}
+
+// 显示热门标签
+function displayTopTags(tags) {
+    const container = document.getElementById('top-tags');
+    
+    if (tags.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">暂无标签数据</p>';
+        return;
+    }
+
+    const html = tags.map(tag => `
+        <span class="badge bg-primary me-2 mb-2" style="font-size: 0.9rem;">
+            ${tag.name}
+            <span class="badge bg-light text-dark ms-1">${tag.count}</span>
+        </span>
+    `).join('');
+
+    container.innerHTML = html;
+}
+</script>
+{% endblock %}

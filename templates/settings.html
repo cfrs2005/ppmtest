@@ -1,0 +1,658 @@
+{% extends "base.html" %}
+
+{% block title %}设置 - Bilibili视频分析系统{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1>
+                <i class="fas fa-cog"></i> 系统设置
+            </h1>
+            <p class="text-muted">配置API参数、分析选项和系统行为</p>
+        </div>
+    </div>
+
+    <!-- Settings Tabs -->
+    <div class="row">
+        <div class="col-12">
+            <ul class="nav nav-tabs" id="settings-tabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="api-tab" data-bs-toggle="tab" data-bs-target="#api" type="button">
+                        <i class="fas fa-plug"></i> API配置
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button">
+                        <i class="fas fa-brain"></i> 分析设置
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#export" type="button">
+                        <i class="fas fa-download"></i> 导出设置
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="system-tab" data-bs-toggle="tab" data-bs-target="#system" type="button">
+                        <i class="fas fa-server"></i> 系统设置
+                    </button>
+                </li>
+            </ul>
+            
+            <div class="tab-content" id="settings-tab-content">
+                <!-- API Configuration Tab -->
+                <div class="tab-pane fade show active" id="api" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">API服务配置</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="api-config-form">
+                                <div class="mb-3">
+                                    <label for="openai-api-key" class="form-label">OpenAI API Key</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="openai-api-key" 
+                                               placeholder="sk-..." value="{{ settings.get('openai_api_key', '') }}">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('openai-api-key')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">
+                                        用于GPT模型分析的API密钥
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="openai-model" class="form-label">OpenAI模型</label>
+                                    <select class="form-select" id="openai-model">
+                                        <option value="gpt-3.5-turbo" {% if settings.get('openai_model') == 'gpt-3.5-turbo' %}selected{% endif %}>GPT-3.5 Turbo</option>
+                                        <option value="gpt-4" {% if settings.get('openai_model') == 'gpt-4' %}selected{% endif %}>GPT-4</option>
+                                        <option value="gpt-4-turbo" {% if settings.get('openai_model') == 'gpt-4-turbo' %}selected{% endif %}>GPT-4 Turbo</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="anthropic-api-key" class="form-label">Anthropic API Key</label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control" id="anthropic-api-key" 
+                                               placeholder="sk-ant-..." value="{{ settings.get('anthropic_api_key', '') }}">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('anthropic-api-key')">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">
+                                        用于Claude模型分析的API密钥
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="default-service" class="form-label">默认AI服务</label>
+                                    <select class="form-select" id="default-service">
+                                        <option value="openai" {% if settings.get('default_service') == 'openai' %}selected{% endif %}>OpenAI</option>
+                                        <option value="anthropic" {% if settings.get('default_service') == 'anthropic' %}selected{% endif %}>Anthropic</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> 保存API配置
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="testApiConnection()">
+                                        <i class="fas fa-vial"></i> 测试连接
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analysis Settings Tab -->
+                <div class="tab-pane fade" id="analysis" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">分析参数设置</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="analysis-config-form">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="max-chunk-size" class="form-label">最大分块大小</label>
+                                            <input type="number" class="form-control" id="max-chunk-size" 
+                                                   value="{{ settings.get('max_chunk_size', 1000) }}" min="100" max="5000">
+                                            <div class="form-text">
+                                                单次分析的最大字符数
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="chunk-overlap" class="form-label">分块重叠大小</label>
+                                            <input type="number" class="form-control" id="chunk-overlap" 
+                                                   value="{{ settings.get('chunk_overlap', 200) }}" min="0" max="1000">
+                                            <div class="form-text">
+                                                分块之间的重叠字符数
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="max-tokens" class="form-label">最大Token数</label>
+                                            <input type="number" class="form-control" id="max-tokens" 
+                                                   value="{{ settings.get('max_tokens', 2000) }}" min="100" max="8000">
+                                            <div class="form-text">
+                                                AI响应的最大Token数
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="temperature" class="form-label">创造性参数</label>
+                                            <input type="number" class="form-control" id="temperature" 
+                                                   value="{{ settings.get('temperature', 0.7) }}" min="0" max="2" step="0.1">
+                                            <div class="form-text">
+                                                0=确定性输出，1=创造性输出
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="analysis-prompt" class="form-label">分析提示词</label>
+                                    <textarea class="form-control" id="analysis-prompt" rows="4">{{ settings.get('analysis_prompt', '请分析以下视频内容，提取关键信息和知识点...') }}</textarea>
+                                    <div class="form-text">
+                                        自定义AI分析提示词
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="default-language" class="form-label">默认字幕语言</label>
+                                    <select class="form-select" id="default-language">
+                                        <option value="zh-CN" {% if settings.get('default_language') == 'zh-CN' %}selected{% endif %}>中文</option>
+                                        <option value="en" {% if settings.get('default_language') == 'en' %}selected{% endif %}>English</option>
+                                        <option value="ja" {% if settings.get('default_language') == 'ja' %}selected{% endif %}>日本語</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="auto-extract" 
+                                               {% if settings.get('auto_extract', false) %}checked{% endif %}>
+                                        <label class="form-check-label" for="auto-extract">
+                                            自动提取视频字幕
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enable-cache" 
+                                               {% if settings.get('enable_cache', true) %}checked{% endif %}>
+                                        <label class="form-check-label" for="enable-cache">
+                                            启用分析结果缓存
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 保存分析设置
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Export Settings Tab -->
+                <div class="tab-pane fade" id="export" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">导出配置</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="export-config-form">
+                                <div class="mb-3">
+                                    <label for="default-export-format" class="form-label">默认导出格式</label>
+                                    <select class="form-select" id="default-export-format">
+                                        <option value="json" {% if settings.get('default_export_format') == 'json' %}selected{% endif %}>JSON</option>
+                                        <option value="markdown" {% if settings.get('default_export_format') == 'markdown' %}selected{% endif %}>Markdown</option>
+                                        <option value="csv" {% if settings.get('default_export_format') == 'csv' %}selected{% endif %}>CSV</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="export-include-metadata" class="form-label">导出包含元数据</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="export-include-metadata" 
+                                               {% if settings.get('export_include_metadata', true) %}checked{% endif %}>
+                                        <label class="form-check-label" for="export-include-metadata">
+                                            包含创建时间、更新时间等元数据
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="export-include-tags" class="form-label">导出包含标签</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="export-include-tags" 
+                                               {% if settings.get('export_include_tags', true) %}checked{% endif %}>
+                                        <label class="form-check-label" for="export-include-tags">
+                                            包含标签信息
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="export-include-analysis" class="form-label">导出包含分析信息</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="export-include-analysis" 
+                                               {% if settings.get('export_include_analysis', false) %}checked{% endif %}>
+                                        <label class="form-check-label" for="export-include-analysis">
+                                            包含来源分析信息
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="export-filename-template" class="form-label">导出文件名模板</label>
+                                    <input type="text" class="form-control" id="export-filename-template" 
+                                           value="{{ settings.get('export_filename_template', 'knowledge_base_{date}.{format}') }}"
+                                           placeholder="knowledge_base_{date}.{format}">
+                                    <div class="form-text">
+                                        可用变量: {date}, {time}, {format}, {count}
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i> 保存导出设置
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Settings Tab -->
+                <div class="tab-pane fade" id="system" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">系统设置</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="system-config-form">
+                                <div class="mb-3">
+                                    <label for="max-concurrent-analysis" class="form-label">最大并发分析数</label>
+                                    <input type="number" class="form-control" id="max-concurrent-analysis" 
+                                           value="{{ settings.get('max_concurrent_analysis', 3) }}" min="1" max="10">
+                                    <div class="form-text">
+                                        同时进行的最大分析任务数
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="analysis-timeout" class="form-label">分析超时时间（秒）</label>
+                                    <input type="number" class="form-control" id="analysis-timeout" 
+                                           value="{{ settings.get('analysis_timeout', 300) }}" min="60" max="1800">
+                                    <div class="form-text">
+                                        单个分析任务的最大执行时间
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="log-level" class="form-label">日志级别</label>
+                                    <select class="form-select" id="log-level">
+                                        <option value="DEBUG" {% if settings.get('log_level') == 'DEBUG' %}selected{% endif %}>DEBUG</option>
+                                        <option value="INFO" {% if settings.get('log_level') == 'INFO' %}selected{% endif %}>INFO</option>
+                                        <option value="WARNING" {% if settings.get('log_level') == 'WARNING' %}selected{% endif %}>WARNING</option>
+                                        <option value="ERROR" {% if settings.get('log_level') == 'ERROR' %}selected{% endif %}>ERROR</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enable-telemetry" 
+                                               {% if settings.get('enable_telemetry', false) %}checked{% endif %}>
+                                        <label class="form-check-label" for="enable-telemetry">
+                                            启用遥测数据收集
+                                        </label>
+                                    </div>
+                                    <div class="form-text">
+                                        帮助改进系统性能和用户体验
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="auto-update" 
+                                               {% if settings.get('auto_update', false) %}checked{% endif %}>
+                                        <label class="form-check-label" for="auto-update">
+                                            自动检查更新
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> 保存系统设置
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning" onclick="resetSettings()">
+                                        <i class="fas fa-undo"></i> 重置为默认值
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- System Information -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">系统信息</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>版本信息</h6>
+                                    <p><strong>系统版本:</strong> 1.0.0</p>
+                                    <p><strong>构建时间:</strong> 2024-01-01</p>
+                                    <p><strong>数据库版本:</strong> SQLite 3.x</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>系统状态</h6>
+                                    <p><strong>运行时间:</strong> <span id="uptime">计算中...</span></p>
+                                    <p><strong>内存使用:</strong> <span id="memory-usage">计算中...</span></p>
+                                    <p><strong>磁盘空间:</strong> <span id="disk-space">计算中...</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    loadSystemInfo();
+    initializeSettingsForms();
+});
+
+// 初始化设置表单
+function initializeSettingsForms() {
+    // API配置表单
+    document.getElementById('api-config-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveApiConfig();
+    });
+    
+    // 分析设置表单
+    document.getElementById('analysis-config-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveAnalysisConfig();
+    });
+    
+    // 导出设置表单
+    document.getElementById('export-config-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveExportConfig();
+    });
+    
+    // 系统设置表单
+    document.getElementById('system-config-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveSystemConfig();
+    });
+}
+
+// 保存API配置
+function saveApiConfig() {
+    const config = {
+        openai_api_key: document.getElementById('openai-api-key').value,
+        openai_model: document.getElementById('openai-model').value,
+        anthropic_api_key: document.getElementById('anthropic-api-key').value,
+        default_service: document.getElementById('default-service').value
+    };
+    
+    fetch('/api/v1/settings/api', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('成功', 'API配置保存成功', 'success');
+        } else {
+            showToast('错误', data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving API config:', error);
+        showToast('错误', '保存API配置失败', 'error');
+    });
+}
+
+// 保存分析配置
+function saveAnalysisConfig() {
+    const config = {
+        max_chunk_size: parseInt(document.getElementById('max-chunk-size').value),
+        chunk_overlap: parseInt(document.getElementById('chunk-overlap').value),
+        max_tokens: parseInt(document.getElementById('max-tokens').value),
+        temperature: parseFloat(document.getElementById('temperature').value),
+        analysis_prompt: document.getElementById('analysis-prompt').value,
+        default_language: document.getElementById('default-language').value,
+        auto_extract: document.getElementById('auto-extract').checked,
+        enable_cache: document.getElementById('enable-cache').checked
+    };
+    
+    fetch('/api/v1/settings/analysis', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('成功', '分析配置保存成功', 'success');
+        } else {
+            showToast('错误', data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving analysis config:', error);
+        showToast('错误', '保存分析配置失败', 'error');
+    });
+}
+
+// 保存导出配置
+function saveExportConfig() {
+    const config = {
+        default_export_format: document.getElementById('default-export-format').value,
+        export_include_metadata: document.getElementById('export-include-metadata').checked,
+        export_include_tags: document.getElementById('export-include-tags').checked,
+        export_include_analysis: document.getElementById('export-include-analysis').checked,
+        export_filename_template: document.getElementById('export-filename-template').value
+    };
+    
+    fetch('/api/v1/settings/export', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('成功', '导出配置保存成功', 'success');
+        } else {
+            showToast('错误', data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving export config:', error);
+        showToast('错误', '保存导出配置失败', 'error');
+    });
+}
+
+// 保存系统配置
+function saveSystemConfig() {
+    const config = {
+        max_concurrent_analysis: parseInt(document.getElementById('max-concurrent-analysis').value),
+        analysis_timeout: parseInt(document.getElementById('analysis-timeout').value),
+        log_level: document.getElementById('log-level').value,
+        enable_telemetry: document.getElementById('enable-telemetry').checked,
+        auto_update: document.getElementById('auto-update').checked
+    };
+    
+    fetch('/api/v1/settings/system', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('成功', '系统配置保存成功', 'success');
+        } else {
+            showToast('错误', data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving system config:', error);
+        showToast('错误', '保存系统配置失败', 'error');
+    });
+}
+
+// 测试API连接
+function testApiConnection() {
+    const service = document.getElementById('default-service').value;
+    const apiKey = service === 'openai' ? 
+        document.getElementById('openai-api-key').value : 
+        document.getElementById('anthropic-api-key').value;
+    
+    if (!apiKey) {
+        showToast('错误', '请先输入API密钥', 'error');
+        return;
+    }
+    
+    showToast('提示', '正在测试API连接...', 'info');
+    
+    fetch('/api/v1/settings/test-api', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            service: service,
+            api_key: apiKey
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('成功', 'API连接测试成功', 'success');
+        } else {
+            showToast('错误', data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error testing API connection:', error);
+        showToast('错误', 'API连接测试失败', 'error');
+    });
+}
+
+// 重置设置
+function resetSettings() {
+    if (!confirm('确定要重置所有设置为默认值吗？此操作不可撤销。')) {
+        return;
+    }
+    
+    fetch('/api/v1/settings/reset', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('成功', '设置已重置为默认值', 'success');
+            // 刷新页面
+            window.location.reload();
+        } else {
+            showToast('错误', data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error resetting settings:', error);
+        showToast('错误', '重置设置失败', 'error');
+    });
+}
+
+// 加载系统信息
+function loadSystemInfo() {
+    fetch('/api/v1/system/info')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const info = data.data;
+                document.getElementById('uptime').textContent = formatUptime(info.uptime);
+                document.getElementById('memory-usage').textContent = formatBytes(info.memory_usage);
+                document.getElementById('disk-space').textContent = formatBytes(info.disk_space);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading system info:', error);
+        });
+}
+
+// 切换密码显示
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = input.nextElementSibling.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+// 格式化运行时间
+function formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    
+    if (days > 0) {
+        return `${days}天 ${hours}小时 ${minutes}分钟`;
+    } else if (hours > 0) {
+        return `${hours}小时 ${minutes}分钟`;
+    } else {
+        return `${minutes}分钟`;
+    }
+}
+
+// 格式化字节数
+function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+</script>
+{% endblock %}
