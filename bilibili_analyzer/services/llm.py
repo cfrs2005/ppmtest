@@ -13,6 +13,7 @@ import logging
 
 import openai
 import anthropic
+import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 logger = logging.getLogger(__name__)
@@ -22,6 +23,7 @@ class LLMProvider(Enum):
     """LLM提供商枚举"""
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
+    GLM = "glm"
 
 
 class ModelType(Enum):
@@ -36,6 +38,11 @@ class ModelType(Enum):
     CLAUDE_3_HAIKU = "claude-3-haiku-20240307"
     CLAUDE_3_SONNET = "claude-3-sonnet-20240229"
     CLAUDE_3_OPUS = "claude-3-opus-20240229"
+    
+    # GLM模型
+    GLM_4_FLASH = "glm-4-flash"
+    GLM_4_AIR = "glm-4-air"
+    GLM_4_VISION = "glm-4-vision"
 
 
 @dataclass
@@ -295,16 +302,120 @@ class AnthropicService(BaseLLMService):
         return input_cost + output_cost
 
 
+class GLMService(BaseLLMService):
+    """GLM服务实现，使用OpenAI兼容接口"""
+    
+    # Token价格 (USD per 1K tokens) - 估算值
+    TOKEN_PRICES = {
+        ModelType.GLM_4_FLASH: {"input": 0.0005, "output": 0.002},
+        ModelType.GLM_4_AIR: {"input": 0.001, "output": 0.003},
+        ModelType.GLM_4_VISION: {"input": 0.002, "output": 0.006},
+    }
+    
+    def __init__(self, api_key: str, config: ModelConfig, base_url: str = "https://open.bigmodel.cn/api/paas/v4"):
+        super().__init__(api_key, config)
+        self.base_url = base_url
+        self.client = openai.AsyncOpenAI(
+            api_key=api_key,
+            base_url=base_url
+        )
+    
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10)
+    )
+    async def chat(self, messages: List[LLMMessage], **kwargs) -> LLMResponse:
+        """调用GLM API（OpenAI兼容接口）"""
+        start_time = time.time()
+        
+        try:
+            # 转换消息格式
+            openai_messages = [
+                {"role": msg.role, "content": msg.content}
+                for msg in messages
+            ]
+            
+            # 调用API
+            response = await self.client.chat.completions.create(
+                model=self.config.model.value,
+                messages=openai_messages,
+                max_tokens=self.config.max_tokens,
+                temperature=self.config.temperature,
+                top_p=self.config.top_p,
+                timeout=self.config.timeout,
+                **kwargs
+            )
+            
+            # 计算统计信息
+            latency = time.time() - start_time
+            content = response.choices[0].message.content
+            tokens_used = response.usage.total_tokens
+            
+            # 估算成本
+            input_tokens = response.usage.prompt_tokens
+            output_tokens = response.usage.completion_tokens
+            cost = self._calculate_cost(input_tokens, output_tokens)
+            
+            return LLMResponse(
+                content=content,
+                model_used=self.config.model.value,
+                tokens_used=tokens_used,
+                cost=cost,
+                latency=latency
+            )
+            
+        except Exception as e:
+            logger.error(f"GLM API调用失败: {e}")
+            raise
+    
+    def count_tokens(self, text: str) -> int:
+        """计算token数量"""
+        try:
+            import tiktoken
+            # GLM使用类似GPT的tokenization
+            encoding = tiktoken.encoding_for_model("gpt-4")
+            return len(encoding.encode(text))
+        except ImportError:
+            # 简单估算：中文字符算2个token，英文单词算1.3个token
+            chinese_chars = len([c for c in text if '\u4e00' <= c <= '\u9fff'])
+            english_words = len(text.split()) - chinese_chars
+            return int(chinese_chars * 2 + english_words * 1.3)
+    
+    def estimate_cost(self, tokens: int) -> float:
+        """估算成本"""
+        prices = self.TOKEN_PRICES.get(self.config.model)
+        if not prices:
+            return 0.0
+        
+        # 假设输入输出token比例约为1:1
+        input_cost = (tokens / 2) * prices["input"] / 1000
+        output_cost = (tokens / 2) * prices["output"] / 1000
+        return input_cost + output_cost
+    
+    def _calculate_cost(self, input_tokens: int, output_tokens: int) -> float:
+        """计算实际成本"""
+        prices = self.TOKEN_PRICES.get(self.config.model)
+        if not prices:
+            return 0.0
+        
+        input_cost = input_tokens * prices["input"] / 1000
+        output_cost = output_tokens * prices["output"] / 1000
+        return input_cost + output_cost
+
+
 class LLMServiceFactory:
     """LLM服务工厂"""
     
     @staticmethod
-    def create_service(provider: LLMProvider, api_key: str, config: ModelConfig) -> BaseLLMService:
+    def create_service(provider: LLMProvider, api_key: str, config: ModelConfig, **kwargs) -> BaseLLMService:
         """创建LLM服务实例"""
         if provider == LLMProvider.OPENAI:
             return OpenAIService(api_key, config)
         elif provider == LLMProvider.ANTHROPIC:
             return AnthropicService(api_key, config)
+        elif provider == LLMProvider.GLM:
+            base_url = kwargs.get('base_url', 'https://open.bigmodel.cn/api/paas/v4')
+            return GLMService(api_key, config, base_url)
         else:
             raise ValueError(f"不支持的LLM提供商: {provider}")
 

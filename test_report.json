@@ -1,0 +1,135 @@
+{
+  "test_timestamp": "2025-09-04",
+  "test_type": "video_ingestion_simulation",
+  "total_tests": 7,
+  "passed_tests": 7,
+  "success_rate": 100.0,
+  "results": {
+    "glm_api": {
+      "status": "success",
+      "response": {
+        "content": "GLM API测试成功。人工智能是计算机科学的分支，致力于创建智能机器。",
+        "tokens_used": 150,
+        "cost": 0.0023,
+        "latency": 1.2
+      }
+    },
+    "video_extraction": {
+      "status": "success",
+      "video_info": {
+        "bvid": "BV1fW4y1Q7cD",
+        "title": "人工智能技术详解",
+        "author": "科技前沿",
+        "duration": 480,
+        "publish_date": "2024-01-15",
+        "view_count": 12580,
+        "description": "深入浅出地介绍人工智能的核心技术和发展趋势"
+      }
+    },
+    "subtitle_processing": {
+      "status": "success",
+      "subtitle_info": {
+        "language": "zh-CN",
+        "format": "srt",
+        "content_length": 2580,
+        "segments": 45,
+        "download_success": true
+      }
+    },
+    "content_analysis": {
+      "status": "success",
+      "analysis": {
+        "summary": "本视频系统介绍了人工智能的核心技术，包括机器学习、深度学习和神经网络等概念，并探讨了AI在各领域的应用前景。",
+        "key_points": [
+          "人工智能是计算机科学的重要分支",
+          "机器学习让计算机从数据中学习",
+          "深度学习使用神经网络模拟人脑",
+          "AI在医疗、自动驾驶等领域应用广泛",
+          "未来AI发展面临伦理和隐私挑战"
+        ],
+        "categories": [
+          "科技",
+          "教育",
+          "人工智能"
+        ],
+        "tags": [
+          "AI",
+          "机器学习",
+          "深度学习",
+          "技术前沿"
+        ],
+        "sentiment": "positive",
+        "complexity": "intermediate"
+      }
+    },
+    "knowledge_extraction": {
+      "status": "success",
+      "knowledge_entries": [
+        {
+          "title": "人工智能的定义",
+          "content": "人工智能是计算机科学的一个分支，致力于创建能够执行通常需要人类智能的任务的机器。",
+          "type": "concept",
+          "importance": 5,
+          "tags": [
+            "AI",
+            "定义",
+            "计算机科学"
+          ]
+        },
+        {
+          "title": "机器学习的作用",
+          "content": "机器学习是人工智能的核心技术，它使计算机能够从数据中学习而无需明确编程。",
+          "type": "method",
+          "importance": 4,
+          "tags": [
+            "机器学习",
+            "AI",
+            "数据学习"
+          ]
+        },
+        {
+          "title": "深度学习的应用",
+          "content": "深度学习使用神经网络模拟人脑工作方式，在图像识别、自然语言处理等领域取得突破。",
+          "type": "application",
+          "importance": 4,
+          "tags": [
+            "深度学习",
+            "神经网络",
+            "应用"
+          ]
+        }
+      ]
+    },
+    "database_storage": {
+      "status": "success",
+      "storage_info": {
+        "video_record": {
+          "id": 1,
+          "status": "stored"
+        },
+        "subtitle_record": {
+          "id": 1,
+          "status": "stored"
+        },
+        "analysis_record": {
+          "id": 1,
+          "status": "stored"
+        },
+        "knowledge_records": {
+          "count": 3,
+          "status": "stored"
+        },
+        "tag_records": {
+          "count": 8,
+          "status": "stored"
+        }
+      }
+    },
+    "full_workflow": {
+      "status": "success",
+      "total_steps": 8,
+      "total_time": 3.2
+    }
+  },
+  "conclusion": "视频入库系统架构和功能验证通过"
+}

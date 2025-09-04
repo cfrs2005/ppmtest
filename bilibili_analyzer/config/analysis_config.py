@@ -55,6 +55,28 @@ LLM_CONFIG = {
                 "timeout": 60
             }
         }
+    },
+    "glm": {
+        "api_key": os.getenv("GLM_API_KEY", ""),
+        "base_url": os.getenv("GLM_API_BASE", "https://open.bigmodel.cn/api/paas/v4"),
+        "default_model": "glm-4-flash",
+        "models": {
+            "glm-4-flash": {
+                "max_tokens": 4000,
+                "temperature": 0.7,
+                "timeout": 30
+            },
+            "glm-4-air": {
+                "max_tokens": 4000,
+                "temperature": 0.7,
+                "timeout": 45
+            },
+            "glm-4-vision": {
+                "max_tokens": 4000,
+                "temperature": 0.7,
+                "timeout": 60
+            }
+        }
     }
 }
 
@@ -214,7 +236,8 @@ def validate_config() -> bool:
     """验证配置是否有效"""
     required_keys = [
         "openai.api_key",
-        "anthropic.api_key"
+        "anthropic.api_key",
+        "glm.api_key"
     ]
     
     for key in required_keys:
@@ -230,6 +253,7 @@ def print_config_summary():
     print("=== 大模型内容分析模块配置摘要 ===")
     print(f"OpenAI API配置: {'已配置' if LLM_CONFIG['openai']['api_key'] else '未配置'}")
     print(f"Anthropic API配置: {'已配置' if LLM_CONFIG['anthropic']['api_key'] else '未配置'}")
+    print(f"GLM API配置: {'已配置' if LLM_CONFIG['glm']['api_key'] else '未配置'}")
     print(f"分块处理: {'启用' if ANALYSIS_CONFIG['enable_chunking'] else '禁用'}")
     print(f"缓存机制: {'启用' if ANALYSIS_CONFIG['enable_caching'] else '禁用'}")
     print(f"知识提取: {'启用' if ANALYSIS_CONFIG['enable_knowledge_extraction'] else '禁用'}")
