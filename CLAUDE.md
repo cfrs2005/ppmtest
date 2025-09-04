@@ -118,6 +118,10 @@ Main conversation stays strategic - agents handle implementation details. This p
 - gh-sub-issue extension for parent-child relationships
 - Proper repository permissions
 
+### Remote Repository
+- **Repository URL**: https://github.com/cfrs2005/ppmtest
+- **Main Branch**: main
+
 ### Sync Strategy
 - Local operations first for speed
 - Explicit sync when ready
