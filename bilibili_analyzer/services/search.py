@@ -18,10 +18,14 @@ class SearchService:
     
     def __init__(self):
         """初始化搜索服务"""
-        self._init_fts_tables()
+        # 延迟初始化，避免应用上下文问题
+        self._initialized = False
     
     def _init_fts_tables(self):
         """初始化FTS5虚拟表"""
+        if self._initialized:
+            return
+            
         try:
             # 检查FTS表是否存在
             result = db.session.execute(text(
@@ -97,6 +101,8 @@ class SearchService:
             db.session.rollback()
             logger.error(f"初始化FTS5表失败: {e}")
             raise
+        finally:
+            self._initialized = True
     
     def search(self, query: str, limit: int = 50, offset: int = 0, 
                search_type: str = 'fulltext', filters: Dict[str, Any] = None) -> List[Dict[str, Any]]:

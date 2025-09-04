@@ -21,7 +21,7 @@ def health_check():
     
     health_data = {
         'status': 'healthy' if db_status == 'healthy' else 'unhealthy',
-        'timestamp': request.timestamp,
+        'timestamp': current_app.config.get('START_TIME', 'unknown'),
         'components': {
             'database': db_status,
             'api': 'healthy'

@@ -272,7 +272,7 @@ def get_analysis_stats():
 
 @bp.route('/v1/stats/knowledge', methods=['GET'])
 @require_rate_limit
-def get_knowledge_stats():
+def get_knowledge_stats_endpoint():
     """获取知识库统计信息"""
     try:
         # 基础统计
