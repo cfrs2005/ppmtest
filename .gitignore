@@ -75,3 +75,6 @@ celerybeat.pid
 
 # Redis
 dump.rdb
+
+# Local validation services (not committed to git)
+validation_services/

@@ -149,3 +149,52 @@ Main conversation stays strategic - agents handle implementation details. This p
 - Tasks start as `001.md`, `002.md` during decomposition
 - After GitHub sync, renamed to `{issue-id}.md`
 - Makes navigation intuitive: issue #1234 = file `1234.md`
+
+## 测试行为记录 / Testing Behavior Records
+
+### 本地验证服务 / Local Validation Services
+
+#### 创建目的 / Creation Purpose
+- 在本地创建用于验证的Python服务目录
+- 该目录不会提交到Git仓库（已在.gitignore中配置）
+- 用于测试第三方服务集成和功能验证
+
+#### DingTalk机器人服务 / DingTalk Bot Service
+
+**服务实现 / Service Implementation**:
+- 文件位置：`validation_services/dingtalk_bot.py`
+- 完整的钉钉机器人API集成，支持签名验证
+- 包含时间戳生成、签名计算、消息发送等功能
+
+**测试过程 / Testing Process**:
+1. **初始测试**: 使用access_token `83c93d0b2c3010646fd0b84d08f945ac97cb787a34a7cef471668ecd97c18afc`
+   - 遇到签名验证要求，实现完整的签名支持
+   - 需要secret_key进行签名计算
+
+2. **密钥更新**: 更换为新的access_token `d5af88b6c4a93cc4b263dae7abc9ad5feacfc286611248ee7b5edd3b65be29c4`
+   - 仍然需要签名验证
+   - 实现了完整的签名验证机制
+
+3. **依赖问题**: 遇到`ModuleNotFoundError: No module named 'requests'`
+   - 需要安装requests库依赖
+   - 测试暂停，等待依赖安装
+
+**服务功能 / Service Features**:
+- 发送文本消息到钉钉群组
+- 支持签名验证确保安全性
+- 自动生成时间戳和签名
+- 错误处理和日志记录
+
+**测试脚本 / Testing Scripts**:
+- `validation_services/dingtalk_bot_demo.py` - 演示版本
+- `validation_services/dingtalk_bot.py` - 完整实现版本
+
+#### 环境配置 / Environment Configuration
+- Python虚拟环境管理
+- 依赖库安装（requests等）
+- 本地服务目录结构
+
+#### 后续计划 / Future Plans
+- 完成requests库依赖安装
+- 测试DingTalk机器人消息发送功能
+- 扩展更多本地验证服务

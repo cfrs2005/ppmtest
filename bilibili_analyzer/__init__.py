@@ -26,8 +26,14 @@ def create_app(config_class=None):
     
     # 注册蓝图
     try:
-        from .main import bp as main_bp
+        from .main_simple import bp as main_bp
         app.register_blueprint(main_bp)
+    except ImportError:
+        pass
+    
+    try:
+        from .auth_simple import bp as auth_bp
+        app.register_blueprint(auth_bp)
     except ImportError:
         pass
     

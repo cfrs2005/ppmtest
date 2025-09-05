@@ -2,18 +2,23 @@
 Main蓝图 - 主要页面路由
 """
 
-from flask import Blueprint, render_template, jsonify, request
+from flask import Blueprint, render_template, jsonify, request, session, redirect, url_for
 from bilibili_analyzer.models import Channel, Video, AnalysisResult, KnowledgeEntry, Tag
 from bilibili_analyzer import db
+from bilibili_analyzer.auth import login_required
 
 bp = Blueprint('main', __name__)
 
 @bp.route('/')
 def index():
     """首页"""
-    return render_template('index.html')
+    if 'logged_in' in session and session['logged_in']:
+        return redirect(url_for('main.dashboard'))
+    else:
+        return redirect(url_for('auth.login'))
 
 @bp.route('/dashboard')
+@login_required
 def dashboard():
     """仪表板"""
     # 获取统计数据
@@ -24,7 +29,8 @@ def dashboard():
     return render_template('dashboard.html', 
                          channel_count=channel_count,
                          video_count=video_count,
-                         analysis_count=analysis_count)
+                         analysis_count=analysis_count,
+                         username=session.get('username', '用户'))
 
 @bp.route('/channels')
 def channels():
