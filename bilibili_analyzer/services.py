@@ -254,5 +254,11 @@ class DatabaseService:
         """析构函数，关闭请求处理器"""
         try:
             close_request_handler()
-        except:
-            pass
+        except (ImportError, AttributeError, RuntimeError) as e:
+            # 只记录预期的异常，避免掩盖其他问题
+            import logging
+            logging.getLogger(__name__).warning(f"关闭请求处理器时发生预期错误: {e}")
+        except Exception as e:
+            # 记录其他异常以便调试
+            import logging
+            logging.getLogger(__name__).error(f"关闭请求处理器时发生未预期错误: {e}")

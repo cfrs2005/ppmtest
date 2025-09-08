@@ -267,8 +267,9 @@ class AnthropicService(BaseLLMService):
         try:
             # 使用anthropic的tokenizer
             return self.client.count_tokens(text)
-        except:
-            # 简单估算
+        except (AttributeError, ImportError, Exception) as e:
+            # 记录具体错误并使用简单估算
+            logger.warning(f"Anthropic tokenizer失败，使用简单估算: {e}")
             chinese_chars = len([c for c in text if '\u4e00' <= c <= '\u9fff'])
             english_words = len(text.split()) - chinese_chars
             return int(chinese_chars * 1.5 + english_words * 1.2)

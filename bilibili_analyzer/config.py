@@ -12,7 +12,9 @@ class Config:
     """基础配置类"""
     
     # 基础Flask配置
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-in-production'
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError("SECRET_KEY环境变量必须设置")
     
     # Session配置
     PERMANENT_SESSION_LIFETIME = 3600  # 1小时
@@ -49,6 +51,14 @@ class DevelopmentConfig(Config):
     """开发环境配置"""
     DEBUG = True
     SQLALCHEMY_ECHO = True
+    
+    def __init__(self):
+        super().__init__()
+        # 开发环境可以使用默认密钥，但会发出警告
+        if not self.SECRET_KEY:
+            import warnings
+            warnings.warn("使用默认SECRET_KEY仅用于开发环境，生产环境必须设置环境变量")
+            self.SECRET_KEY = 'dev-secret-key-change-in-production-development-only'
 
 class ProductionConfig(Config):
     """生产环境配置"""

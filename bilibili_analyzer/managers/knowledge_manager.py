@@ -8,6 +8,7 @@ from typing import List, Dict, Any, Optional, Union
 from datetime import datetime
 from sqlalchemy import text, func, or_, and_
 from sqlalchemy.dialects.sqlite import json as sqlite_json
+from sqlalchemy.orm import joinedload, contains_eager
 
 from ..models import db, KnowledgeEntry, Analysis, Tag, knowledge_tags, get_or_create_tag
 from ..analyzers.content_analyzer import AnalysisResult
@@ -151,8 +152,8 @@ class KnowledgeManager:
             List[Dict[str, Any]]: 匹配的知识条目列表
         """
         try:
-            # 构建查询
-            query = KnowledgeEntry.query.join(KnowledgeEntry.tags).filter(Tag.name.in_(tags))
+            # 构建查询 - 使用joinedload优化关联查询
+            query = KnowledgeEntry.query.options(joinedload(KnowledgeEntry.tags)).join(KnowledgeEntry.tags).filter(Tag.name.in_(tags))
             
             # 如果有多个标签，使用OR关系
             if len(tags) > 1:
