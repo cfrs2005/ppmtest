@@ -169,7 +169,8 @@ class MemoryCache:
         if self.config.enable_compression:
             try:
                 return pickle.dumps(value)
-            except:
+            except (pickle.PicklingError, TypeError) as e:
+                logger.warning(f"序列化失败，返回原始值: {e}")
                 return value
         return value
     
@@ -178,7 +179,8 @@ class MemoryCache:
         if self.config.enable_compression and isinstance(value, bytes):
             try:
                 return pickle.loads(value)
-            except:
+            except (pickle.UnpicklingError, EOFError) as e:
+                logger.warning(f"反序列化失败，返回原始值: {e}")
                 return value
         return value
     

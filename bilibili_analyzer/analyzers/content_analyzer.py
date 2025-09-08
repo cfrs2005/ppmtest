@@ -376,8 +376,9 @@ class ContentAnalyzer:
         try:
             data = json.loads(response.content)
             return data.get('key_points', [])
-        except:
-            # 简单的行解析
+        except (json.JSONDecodeError, AttributeError, ValueError) as e:
+            # JSON解析失败时使用简单的行解析
+            logger.warning(f"关键点JSON解析失败，使用行解析: {e}")
             lines = response.split('\n')
             key_points = []
             for line in lines:
@@ -399,8 +400,9 @@ class ContentAnalyzer:
         try:
             data = json.loads(response.content)
             return data.get('categories', [])
-        except:
-            # 简单的行解析
+        except (json.JSONDecodeError, AttributeError, ValueError) as e:
+            # JSON解析失败时使用简单的行解析
+            logger.warning(f"分类JSON解析失败，使用行解析: {e}")
             lines = response.split('\n')
             categories = []
             for line in lines:
@@ -422,8 +424,9 @@ class ContentAnalyzer:
         try:
             data = json.loads(response.content)
             return data.get('tags', [])
-        except:
-            # 简单的行解析
+        except (json.JSONDecodeError, AttributeError, ValueError) as e:
+            # JSON解析失败时使用简单的行解析
+            logger.warning(f"标签JSON解析失败，使用行解析: {e}")
             lines = response.split('\n')
             tags = []
             for line in lines:
