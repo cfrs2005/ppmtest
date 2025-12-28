@@ -13,6 +13,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **Go-based Blog System** (similar to WordPress) with GLM AI model integration, built with MySQL as the database.
 
+**核心目标**: 构建一个功能完整的博客系统，同时作为 Go 语言学习的实战项目，从入门到精通。重点包括：
+- 架构设计模式和最佳实践
+- Go 语言核心技巧和性能优化
+- 数据库设计和优化
+- 完整的教学文档体系（docs/lessons/）
+
 ## System Architecture
 
 ### Core Components
@@ -180,6 +186,94 @@ Main conversation stays strategic - agents handle implementation details. This p
 - Async job processing for AI tasks
 - Configuration for API keys and endpoints
 - Fallback mechanisms for AI failures
+
+## 项目文档系统
+
+### todo.md - 待办事项管理
+**位置**: `/todo.md`（根目录）
+
+**用途**:
+- 记录每次开发会话的待办事项
+- 跟踪功能开发进度
+- 维护任务清单
+
+**更新要求**:
+- 每次开发会话开始时，在文件顶部添加新的会话章节（包含日期）
+- 使用 `- [ ]` 表示未完成的任务
+- 使用 `- [x]` 表示已完成的任务
+- 定期整理和归档已完成的任务
+- 保持任务的原子性和可追踪性
+
+**内容结构**:
+```markdown
+## 当前会话 (YYYY-MM-DD)
+### 正在进行
+- [ ] 任务描述
+
+### 已完成
+- [x] 任务描述
+
+## 功能开发待办
+### 核心功能
+- [ ] 功能列表
+```
+
+### memory.md - 项目记忆档案
+**位置**: `/memory.md`（根目录）
+
+**用途**:
+- 记录项目开发历史和重要决策
+- 技术选型和架构决策的缘由
+- 问题解决方案和经验教训
+- 学习要点和最佳实践
+
+**更新要求**:
+- 每次重要决策或技术选型后更新
+- 记录问题时包含：问题描述、解决方案、相关代码位置
+- 定期总结和提炼经验教训
+- 添加时间戳，保持时序性
+
+**内容结构**:
+```markdown
+## 项目历史
+### YYYY-MM-DD: 事件标题
+#### 重大决策
+- 决策内容和理由
+
+#### 关键技术决策
+- 技术选型和原因
+
+## 技术选型记录
+### 技术名称
+- **选择**: XXX
+- **理由**: 详细说明
+
+## 问题和解决方案
+### 问题 N: 问题描述
+**问题**: 详细描述
+**解决方案**: 具体方案
+**参考**: file_path:line_number
+```
+
+### 教学文档 (docs/lessons/)
+**位置**: `/docs/lessons/`
+
+**用途**:
+- 记录 Go 语言学习的核心知识点
+- 详细解释架构设计、性能优化技巧
+- 提供实战经验和最佳实践
+- 作为新人学习的核心教材
+
+**更新要求**:
+- 每完成一个重要功能或模块后，编写对应的 Lesson
+- Lesson 应包含：理论讲解、实战案例、代码示例、注意事项
+- 使用清晰的章节结构，便于查阅
+- 添加代码示例和图表辅助说明
+
+**已完成的 Lessons**:
+- ✅ Lesson 01: 数据库设计基础
+- ✅ Lesson 02: 服务层架构设计
+- 🔄 Lesson 03: Web 框架最佳实践（进行中）
 
 # important-instruction-reminders
 Do what has been asked; nothing more, nothing less.
