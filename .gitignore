@@ -1,32 +1,21 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
+# Go
+*.exe
+*.exe~
+*.dll
 *.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+*.dylib
+*.test
+*.out
+go.work
+vendor/
 
-# Virtual Environment
-venv/
-env/
-ENV/
-env.bak/
-venv.bak/
+# Go build cache
+.cache/
+
+# Binaries
+bin/
+dist/
+build/
 
 # IDE
 .vscode/
@@ -34,6 +23,7 @@ venv.bak/
 *.swp
 *.swo
 *~
+*.iml
 
 # OS
 .DS_Store
@@ -58,23 +48,8 @@ logs/
 .env.local
 .env.*.local
 
-# Migration
-migrations/versions/
-
-# PDM
-.pdm-python
-.pdm.toml
-
-# Flask
-instance/
-.webassets-cache
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# Redis
-dump.rdb
+# Air live reload
+tmp/
 
 # Local validation services (not committed to git)
 validation_services/
