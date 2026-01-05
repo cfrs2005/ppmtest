@@ -17,6 +17,12 @@ type Post struct {
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 	PublishedAt *time.Time `json:"published_at,omitempty"`
+
+	// Relations
+	Author    User      `gorm:"foreignKey:AuthorID" json:"author,omitempty"`
+	Comments  []Comment `gorm:"foreignKey:PostID" json:"comments,omitempty"`
+	Tags      []Tag     `gorm:"many2many:post_tags;constraint:OnDelete:CASCADE;" json:"tags,omitempty"`
+	Categories []Category `gorm:"many2many:post_categories;constraint:OnDelete:CASCADE;" json:"categories,omitempty"`
 }
 
 // Comment represents a comment on a post
@@ -27,19 +33,33 @@ type Comment struct {
 	Content   string    `gorm:"type:text;not null" json:"content"`
 	Status    string    `gorm:"size:20;default:pending" json:"status"` // pending, approved, spam
 	CreatedAt time.Time `json:"created_at"`
+
+	// Relations
+	Post   Post `gorm:"foreignKey:PostID" json:"post,omitempty"`
+	Author User `gorm:"foreignKey:AuthorID" json:"author,omitempty"`
 }
 
 // Tag represents a tag for posts
 type Tag struct {
-	ID        uint   `gorm:"primaryKey" json:"id"`
-	Name      string `gorm:"size:100;uniqueIndex;not null" json:"name"`
-	Slug      string `gorm:"size:100;uniqueIndex;not null" json:"slug"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	Name      string    `gorm:"size:100;uniqueIndex;not null" json:"name"`
+	Slug      string    `gorm:"size:100;uniqueIndex;not null" json:"slug"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+
+	// Relations
+	Posts []Post `gorm:"many2many:post_tags;constraint:OnDelete:CASCADE;" json:"posts,omitempty"`
 }
 
 // Category represents a category for posts
 type Category struct {
-	ID          uint   `gorm:"primaryKey" json:"id"`
-	Name        string `gorm:"size:100;not null" json:"name"`
-	Slug        string `gorm:"size:100;uniqueIndex;not null" json:"slug"`
-	Description string `gorm:"type:text" json:"description"`
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	Name        string    `gorm:"size:100;not null" json:"name"`
+	Slug        string    `gorm:"size:100;uniqueIndex;not null" json:"slug"`
+	Description string    `gorm:"type:text" json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+
+	// Relations
+	Posts []Post `gorm:"many2many:post_categories;constraint:OnDelete:CASCADE;" json:"posts,omitempty"`
 }
